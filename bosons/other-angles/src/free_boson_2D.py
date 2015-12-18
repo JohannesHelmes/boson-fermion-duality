@@ -257,7 +257,7 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90):
 
 
 
-    print regA.T
+    #print regA.T
             
     if( (regA==True).sum() > (Lx*Ly/2) ): 
         regA = np.logical_not(regA)
