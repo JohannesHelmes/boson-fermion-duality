@@ -166,6 +166,19 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90):
             for i,e in enumerate(range(x0-1,-1,-1)):
                 regA[e,min(y0+2*i,Ly):]=True
 
+    if angle==45:
+        #y0 must be at least 1
+        if bipart==1:
+            regA[:x0,:]=True
+        elif bipart==2:
+            #concave corners of the pixelized line are the locations of the (x0,y0)
+            triangle_length=y0+x0-1
+            for i,e in enumerate(range(min(Lx,triangle_length))):
+                regA[e,0:min(Ly,triangle_length-i)]=True
+        elif bipart==3:
+            for e,i in enumerate(range(x0,0,-1)):
+                regA[e,y0+i-1:Ly]=True
+
     if angle==67.5:
         #y0 must be at least 1
         if bipart==1:
@@ -208,10 +221,23 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90):
         elif bipart==3:
             regA[x0-1,y0:Ly]=True
             for i,e in enumerate(range(x0-2,-1,-2)):
-                regA[e,min(y0-i-1,Ly):]=True
+                regA[e,max(y0-i-1,0):]=True
                 if e>0:
-                    regA[e-1,min(y0-i-1,Ly):]=True
+                    regA[e-1,max(y0-i-1,0):]=True
 
+
+    if angle==135:
+        #y0 must be at least 1
+        if bipart==1:
+            regA[:x0,:]=True
+        elif bipart==2:
+            #concave corners of the pixelized line are the locations of the (x0,y0)
+            triangle_length=y0+x0-1
+            for i,e in enumerate(range(min(Lx,triangle_length))):
+                regA[e,0:min(Ly,triangle_length-i)]=True
+        elif bipart==3:
+            for i,e in enumerate(range(x0,0,-1)):
+                regA[e-1,max(0,y0-i):Ly]=True
 
     if angle==157.5:
         #y0 must be at least 1
@@ -229,33 +255,9 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90):
             for i,e in enumerate(range(x0-1,-1,-1)):
                 regA[e,max(y0-2*i,0):]=True
 
-    if angle==45:
-        #y0 must be at least 1
-        if bipart==1:
-            regA[:x0,:]=True
-        elif bipart==2:
-            #concave corners of the pixelized line are the locations of the (x0,y0)
-            triangle_length=y0+x0-1
-            for i,e in enumerate(range(min(Lx,triangle_length))):
-                regA[e,0:min(Ly,triangle_length-i)]=True
-        elif bipart==3:
-            for e,i in enumerate(range(x0,0,-1)):
-                regA[e,y0+i-1:Ly]=True
 
-    if angle==135:
-        #y0 must be at least 1
-        if bipart==1:
-            regA[:x0,:]=True
-        elif bipart==2:
-            #concave corners of the pixelized line are the locations of the (x0,y0)
-            triangle_length=y0+x0-1
-            for i,e in enumerate(range(min(Lx,triangle_length))):
-                regA[e,0:min(Ly,triangle_length-i)]=True
-        elif bipart==3:
-            for i,e in enumerate(range(x0,0,-1)):
-                regA[e-1,max(0,y0-i):Ly]=True
 
-    #print regA.T
+    print regA.T
             
     if( (regA==True).sum() > (Lx*Ly/2) ): 
         regA = np.logical_not(regA)

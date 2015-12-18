@@ -10,7 +10,27 @@ comm=MPI.COMM_WORLD
 rank=comm.Get_rank()
 size=comm.Get_size()
 
+angles=[22.5,45,67.5,112.5,135,157.5]
+#       0    1  2    3     4   5
+
 alphaEqTol=1e-3
+
+out_path="../data/"
+
+#############################
+# User settings
+
+order_min = 2
+order_max = 6
+order = clust_order.Max()
+massterm = 1.0
+angle=angles[3]
+
+#alpha= np.linspace(1.0,3,21) 
+alpha = [1.0,2.0,3.0,4.0]
+#############################
+
+clusters = []
 
 def arrayEq(a1, a2):
   eq = True
@@ -49,7 +69,7 @@ def readArray(line):
 
 def readWeights(alpha, massterm, max_order):
   w={}
-  filename = "weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + ".txt"
+  filename = out_path+"weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + ".txt"
   if os.path.isfile(filename):
     fin = open(filename,'r')
     line = fin.readline()
@@ -124,27 +144,6 @@ def generateHamiltonian(Lx,Ly,massterm):
 
     return Ham
 
-#############################
-# User settings
-
-order_min = 2
-order_max = 6
-order = clust_order.Max()
-massterm = 1.0
-#angle=45
-#angle=135
-#angle=22.5
-#angle=157.5
-#angle=67.5
-angle=112.5
-#############################
-
-
-clusters = []
-#alpha= (1./np.linspace(2.1,4,20)).tolist() + np.linspace(0.5,4.0,36).tolist()
-#alpha=np.array( np.linspace(0.4,10,49).tolist() + [20,50,100,200,500,1000] )
-alpha= np.linspace(1.0,3,21) 
-alpha = [1.0,2.0,3.0,4.0]
 
 if rank==0:
     t1 = time.clock()
@@ -155,7 +154,7 @@ if rank==0:
     #print w
 
     #Save the weights to file:
-    filename = "weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + ".txt"
+    filename = out_path+"weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + ".txt"
     if os.path.isfile(filename):
         fout_w = open(filename, 'a')
     else: 
@@ -168,7 +167,7 @@ if rank==0:
 
     fout_res=[0 for i in alpha]
     for i,n in enumerate(alpha):
-      filename = "results_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + "_alpha" + decimalStr(n) + ".txt"
+      filename = out_path+"results_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) + "_alpha" + decimalStr(n) + ".txt"
       fout_res[i] = open(filename, 'w')
 else:
     weights=np.zeros((order_max+1,order_max+1,len(alpha)))

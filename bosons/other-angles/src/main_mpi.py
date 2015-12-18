@@ -10,7 +10,24 @@ comm=MPI.COMM_WORLD
 rank=comm.Get_rank()
 size=comm.Get_size()
 
+angles=[22.5,45,67.5,112.5,135,157.5]
+#       0    1  2    3     4   5
+
+#############################
+# User settings
+
+order_min = 2
+order_max = 8
+order = clust_order.Max()
+massterm = 0.0
+
+angle=angles[3]
+#alpha= np.linspace(1.0,3.0,21).tolist()
+alpha = [1.0,2.0,3.0,4.0]
+
+out_path='../data/'
 alphaEqTol=1e-3
+#############################
 
 def arrayEq(a1, a2):
   eq = True
@@ -47,7 +64,7 @@ def readArray(line):
 
 def readWeights(alpha, massterm, max_order):
   w={}
-  filename = "weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  ".txt"
+  filename = out_path+"weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  ".txt"
   if os.path.isfile(filename):
     fin = open(filename,'r')
     line = fin.readline()
@@ -115,23 +132,8 @@ def getXandP(Lx,Ly,massterm):
 
     return X,P
 
-#############################
-# User settings
-
-order_min = 2
-order_max = 24
-order = clust_order.Max()
-massterm = 0.0
-#angle=157.5
-#angle=22.5
-#angle=67.5
-angle=112.5
-#############################
-
 
 clusters = []
-#alpha= np.linspace(1.0,3.0,21).tolist()
-alpha = [1.0,2.0,3.0,4.0]
 
 if rank==0:
     t1 = time.clock()
@@ -142,7 +144,7 @@ if rank==0:
     #print w
 
     #Save the weights to file:
-    filename = "weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  ".txt"
+    filename = out_path+"weights_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  ".txt"
     if os.path.isfile(filename):
         fout_w = open(filename, 'a')
     else: 
@@ -156,7 +158,7 @@ if rank==0:
 
     fout_res=[0 for i in alpha]
     for i,n in enumerate(alpha):
-      filename = "results_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  "_alpha" + decimalStr(n) + ".txt"
+      filename = out_path+"results_mass" + decimalStr(massterm) +"_angle"+ decimalStr(angle) +  "_alpha" + decimalStr(n) + ".txt"
       fout_res[i] = open(filename, 'w')
     #keylist=w.keys()
 else:
