@@ -21,7 +21,7 @@ out_path="../data/"
 # User settings
 
 order_min = 2
-order_max = 6
+order_max = 30
 order = clust_order.Max()
 massterm = 1.0
 angle=angles[3]

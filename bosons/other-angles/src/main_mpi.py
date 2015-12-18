@@ -17,7 +17,7 @@ angles=[22.5,45,67.5,112.5,135,157.5]
 # User settings
 
 order_min = 2
-order_max = 8
+order_max = 55
 order = clust_order.Max()
 massterm = 0.0
 
