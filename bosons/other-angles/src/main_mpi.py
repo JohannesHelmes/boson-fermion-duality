@@ -17,11 +17,11 @@ angles=[22.5,45,67.5,112.5,135,157.5]
 # User settings
 
 order_min = 2
-order_max = 55
+order_max = 50
 order = clust_order.Max()
 massterm = 0.0
 
-angle=angles[3]
+angle=angles[5]
 #alpha= np.linspace(1.0,3.0,21).tolist()
 alpha = [1.0,2.0,3.0,4.0]
 
