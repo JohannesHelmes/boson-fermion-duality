@@ -21,10 +21,10 @@ out_path="../data/"
 # User settings
 
 order_min = 2
-order_max = 25
+order_max = 30
 order = clust_order.Max()
 massterm = 1.0
-angle=angles[0]
+angle=angles[1]
 
 #alpha= np.linspace(1.0,3,21) 
 alpha = [1.0,2.0,3.0,4.0]

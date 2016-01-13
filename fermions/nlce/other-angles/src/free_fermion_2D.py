@@ -205,7 +205,7 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90): #all factors of two due to ferm
                 regA[e,max(y0-2*i,0):]=True
                 regA[e-1,max(y0-2*i,0):]=True
 
-    #print regA.T
+    print regA.T
 
     if( (regA==True).sum() > (2*Lx*Ly/2) ): 
         regA = np.logical_not(regA)
