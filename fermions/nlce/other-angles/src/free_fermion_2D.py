@@ -174,15 +174,18 @@ def getRegionA((Lx,Ly),(x0,y0),bipart,angle=90): #all factors of two due to ferm
         if bipart==1:
             regA[:2*x0,:]=True
         elif bipart==2:
+            for i,e in enumerate(range(2*x0-1,-1,-2)):
+                regA[e,0:min(Ly,y0+i+1)]=True
+                regA[e-1,0:min(Ly,y0+i+1)]=True
+
+            for i,e in enumerate(range(2*x0,2*Lx,2)):
+                regA[e,0:max(0,y0-i)]=True
+                regA[e+1,0:max(0,y0-i)]=True
             #concave corners of the pixelized line are the locations of the (x0,y0)
-            triangle_length=y0+x0-1
-            for i,e in enumerate(range(0,2*min(Lx,triangle_length),2)):
-                regA[e,0:min(Ly,triangle_length-i)]=True
-                regA[e+1,0:min(Ly,triangle_length-i)]=True
         elif bipart==3:
-            for i,e in enumerate(range(2*x0-1,0,-2)):
-                regA[e,max(0,y0-i):Ly]=True
-                regA[e-1,max(0,y0-i):Ly]=True
+            for i,e in enumerate(range(2*x0-1,-1,-2)):
+                regA[e,max(y0-i,0):]=True
+                regA[e-1,max(y0-i,0):]=True
 
     if angle==157.5:
         #y0 must be at least 1
