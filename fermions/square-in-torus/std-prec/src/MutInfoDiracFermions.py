@@ -8,17 +8,14 @@ Created by Anushya Chandran on 2015-06-30.
 """
 
 
-import EntanglementFuncs_Haldane_highprecision as efunc_highprec
 import EntanglementFuncs_Haldane as efunc
 import sys
 import argparse
 import os
 import numpy as np
-import mpmath as mpm
 import time
 
 def main():
-    mpm.mp.dps=33
     # Parse Arguments
     parser = argparse.ArgumentParser(description='Determining 2f for a linearly dispersing Dirac fermion on a square lattice from the mutual information of concentric circles ')
     
@@ -34,8 +31,6 @@ def main():
     parser.add_argument('--shape','-s', type=str, help='Shape of the region', default='circle')
     
     parser.add_argument('--Lmult','-m', type=float, help='Ratio of system size L to radius r', default=10)
-    
-    parser.add_argument('--highprec','-p', help='Flag for the use of high precision floating points',action='store_true')
     
     parser.add_argument('--outDir', type=str, help='Directory for output file', default='.')
 
@@ -53,16 +48,8 @@ def main():
     Lmult = args.Lmult
     shape = args.shape
 
-    if args.highprec:
-        pre_alphas=mpm.linspace(1,5,41)[1:] #omit the 1.0 to avoid doubling, add it later
-        alphas=[]
-        for a in pre_alphas:
-            alphas.append(1/a)
-            alphas.append(a)
-        alphas.append(mpm.mpf('1.0'))
-
-    else:
-        alphas=(1./np.linspace(1.1,5.0,40)).tolist()+np.linspace(1.0,5.0,41).tolist()
+    alphas=(1./np.linspace(1.1,5.0,40)).tolist()+np.linspace(1.0,5.0,41).tolist()
+    alphas=[1.0,2.0,3.0,4.0]
 
     # Directory for data
     pathn = args.outDir+'/Data/'
@@ -99,10 +86,7 @@ def main():
 
     #print "Start at ",time.clock()
         
-    if args.highprec:
-        efunc_highprec.ee_diffradii(shape, M, bc, epsx, epsy, Lmult, rad_all, alphas, fnames)
-    else:
-        efunc.ee_diffradii(shape, M, bc, epsx, epsy, Lmult, rad_all, alphas, fnames)
+    efunc.ee_diffradii(shape, M, bc, epsx, epsy, Lmult, rad_all, alphas, fnames)
     
     return
 
