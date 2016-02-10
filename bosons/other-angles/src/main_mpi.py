@@ -21,7 +21,7 @@ order_max = 55
 order = clust_order.Max()
 massterm = 0.0
 
-angle=angles[4]
+angle=angles[2]
 #alpha= np.linspace(1.0,3.0,21).tolist()
 alpha = [1.0,2.0,3.0,4.0]
 
