@@ -4,7 +4,6 @@ import os.path  #to check if file exists
 import sys  #for sys.stdout.flush()
 import time
 import free_boson_2D
-import scipy.linalg as la
 from mpi4py import MPI
 
 comm=MPI.COMM_WORLD
@@ -107,10 +106,13 @@ def getXandP(Lx,Ly,massterm):
     if Lx>0:
         K+=np.diag([-1.]*(Ns-Lx),Lx)+np.diag([-1.]*(Ns-Lx),-Lx)
 
-    SqrtK=la.sqrtm(K)
-    P = 1./2. * SqrtK
-    X = 1./2. * la.inv(SqrtK)
+    Eval,Evec = np.linalg.eigh(K) #, b=None, left=False, right=True, overwrite_a=False, overwrite_b=False, check_finite=True)
+    EvMat=np.matrix(Evec)
+    EvaSqrt=np.sqrt(Eval)
 
+    P = 1./2. * EvMat * np.diag(EvaSqrt) * EvMat.T
+    X = 1./2. * EvMat * np.diag(1. /EvaSqrt) * EvMat.T
+    
 
     return X,P
 

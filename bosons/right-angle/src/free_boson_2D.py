@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.linalg as la
 #import time
 #start_time = time.time()
 
