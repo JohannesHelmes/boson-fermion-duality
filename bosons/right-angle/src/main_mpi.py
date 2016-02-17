@@ -12,6 +12,7 @@ rank=comm.Get_rank()
 size=comm.Get_size()
 
 alphaEqTol=1e-3
+path="../data/"
 
 def arrayEq(a1, a2):
   eq = True
@@ -48,7 +49,7 @@ def readArray(line):
 
 def readWeights(alpha, massterm, max_order):
   w={}
-  filename = "weights_mass" + decimalStr(massterm) + ".txt"
+  filename = path+"weights_mass" + decimalStr(massterm) + ".txt"
   if os.path.isfile(filename):
     fin = open(filename,'r')
     line = fin.readline()
@@ -117,7 +118,7 @@ def getXandP(Lx,Ly,massterm):
 # User settings
 
 order_min = 2
-order_max = 20
+order_max = 30
 order = clust_order.Max()
 massterm = 0.0
 #############################
@@ -125,7 +126,7 @@ massterm = 0.0
 
 clusters = []
 alpha= 1./np.linspace(0.2,4,39)
-alpha= (1./np.linspace(2.1,4,20)).tolist() + np.linspace(0.5,4.0,36).tolist()
+alpha= (1./np.linspace(1.1,5,40)).tolist() + np.linspace(1.0,5.0,41).tolist()
 
 if rank==0:
     t1 = time.clock()
@@ -136,18 +137,21 @@ if rank==0:
     #print w
 
     #Save the weights to file:
-    filename = "weights_mass" + decimalStr(massterm) + ".txt"
-    fout_w = open(filename, 'w')
-    #Write the alpha array:
-    fout_w.write("alpha = [ ")
-    for n in alpha:
-      fout_w.write("%.3f\t" %n)
-    fout_w.write(" ]\n\n")
+    filename = path+"weights_mass" + decimalStr(massterm) + ".txt"
+    if os.path.isfile(filename):
+        fout_w = open(filename, 'a')
+    else:
+        fout_w = open(filename, 'w')
+        #Write the alpha array:
+        fout_w.write("alpha = [ ")
+        for n in alpha:
+          fout_w.write("%.3f\t" %n)
+        fout_w.write(" ]\n\n")
 
 
     fout_res=[0 for i in alpha]
     for i,n in enumerate(alpha):
-      filename = "results_mass" + decimalStr(massterm) + "_alpha" + decimalStr(n) + ".txt"
+      filename = path+"results_mass" + decimalStr(massterm) + "_alpha" + decimalStr(n) + ".txt"
       fout_res[i] = open(filename, 'w')
     #keylist=w.keys()
 else:
@@ -191,15 +195,17 @@ for equalsum in range(2*order_min,MaxSUM+1):
             L=(Lx,Ly)
 
             #DO THE STUFF
-            for i,y0 in enumerate(range(1,Ly/2+1)):
+            i=0
+            for y0 in range(1,Ly/2+1):
                 if rank==i%size:
                     local_horEntros[y0]= free_boson_2D.getEntropy(L,alpha,free_boson_2D.getRegionA(L,(0,y0),2),X,P)
+                i+=1
             
-            for i,x0 in enumerate(range(1,Lx)):
-                if rank==(i+Ly/2+1)%size:
+            for x0 in range(1,Lx):
+                if rank==i%size:
                     local_verEntros[x0]= free_boson_2D.getEntropy(L,alpha,free_boson_2D.getRegionA(L,(x0,0),1),X,P)
+                i+=1
 
-            i=0
             for y0 in range(1,(Ly+1)/2):
                 for x0 in range(1,Lx):
                     r0=(x0,y0)
