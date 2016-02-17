@@ -120,7 +120,7 @@ def getXandP(Lx,Ly,massterm):
 # User settings
 
 order_min = 2
-order_max = 30
+order_max = 55 
 order = clust_order.Max()
 massterm = 0.0
 #############################
