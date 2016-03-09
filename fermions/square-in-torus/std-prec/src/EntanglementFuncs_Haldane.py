@@ -341,7 +341,7 @@ def mutinf_annulus_diffradii(M, bc, epsx, epsy, width, Lmult, rad_all, fname):
     
     return
 
-def ee_diffradii(shape, M, bc, epsx, epsy, Lmult, rad_all, alphas, fname):
+def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
     
     #If the radius is a number, not an array, make it an array
     if np.isscalar(rad_all):
@@ -356,7 +356,6 @@ def ee_diffradii(shape, M, bc, epsx, epsy, Lmult, rad_all, alphas, fname):
     f.close()
     '''
     
-    L_all = np.array(rad_all*Lmult, dtype=int)
     
     for i in range(len(rad_all)):
 
