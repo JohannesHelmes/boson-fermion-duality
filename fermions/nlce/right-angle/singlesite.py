@@ -1,5 +1,13 @@
 import free_fermion_2D
 import numpy as np
+import argparse 
+
+parser = argparse.ArgumentParser(description="Compute free fermion entanglement entropy for a single site using NLCE")
+parser.add_argument('-b','--BC',choices=['pbc','yapbc','obc']) 
+
+args = parser.parse_args()
+
+BoundCond = args.BC
 
 
 def makeRegionA_ss(Lx,Ly):
@@ -47,5 +55,5 @@ def getHamiltonian(Lx,Ly,bc='pbc',massterm=1.0): #accepts also 'obc'
 #print makeRegionA_ss(L,L)
 
 for L in range(2,25,2):
-    print free_fermion_2D.getEntropy((L,L),[1.0],makeRegionA_ss(L,L),getHamiltonian(L,L,'obc',1.0))
+    print L, free_fermion_2D.getEntropy((L,L),[1.0],makeRegionA_ss(L,L),getHamiltonian(L,L,BoundCond,1.0))[0]
 

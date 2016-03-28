@@ -11,6 +11,7 @@ Created by Anushya Chandran on 2015-06-30.
 #from pylab import *
 import os
 import numpy as np
+from cmath import phase
 
 
 def one_chern_evec(Hamargs, kx, ky, chkspec= False):
@@ -181,17 +182,29 @@ def twosquares(rad, distance, Lx, Ly):
     
     return (m1, m2, logical_or(m1,m2))
     
+def phi(kx, ky):
+    return phase(complex(np.sin(kx), np.sin(ky) ) )
+def generate_klists(bc, Lx, Ly):
+    """
+    generates all k values depending on the boundary conditions (pbc, apbc, obc)
+    """
+    
+    if bc=='pbc':
+        kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
+        kxlist = 2*np.pi/Lx*np.arange(Lx)
+    elif bc=='apbc':
+        kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
+        kxlist = np.pi/Lx*np.arange(1,2*Lx+1,2)
+    elif bc=='obc':
+        print "Work in progress"
+    else:
+        raise Exception("The flag bc should be 'pbc' or 'apbc'")
+
+    return kxlist, kylist
     
 def cmatfull_analytic(M, bc, Lx, Ly):
     
-    kylist = pi/Ly*arange(1,2*Ly+1,2)
-    
-    if bc=='pbc':
-        kxlist = 2*pi/Lx*arange(Lx)
-    elif bc=='apbc':
-        kxlist = pi/Lx*arange(1,2*Lx+1,2)
-    else:
-        raise Exception("The flag bc should be 'pbc' or 'apbc'")
+    kxlist, kylist = generate_klists(bc, Lx, Ly)
         
     (kygrid, kxgrid) = meshgrid( kylist, kxlist )   
     
@@ -245,16 +258,7 @@ def cmatfull(M, bc, Lx, Ly):
     Returns the full correlation matrix"""
     
     
-    kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
-    #kylist = 2*pi/Ly*arange(Ly)
-    
-    if bc=='pbc':
-        kxlist = 2*np.pi/Lx*np.arange(Lx)
-    elif bc=='apbc':
-        kxlist = np.pi/Lx*np.arange(1,2*Lx+1,2)
-    else:
-        raise Exception("The flag bc should be 'pbc' or 'apbc'")
-    
+    kxlist, kylist = generate_klists(bc, Lx, Ly)
     
     evecs = np.array([[one_chern_evec([M], kx, ky)[1] for ky in kylist] for kx in kxlist])
 
@@ -394,7 +398,7 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
         
         #Appending the data to the end of the file with name fname
             f = open(fname[i], 'a')
-            f.write('%f %f \n'%(radius, sent[i]))
+            f.write('%f %f %f \n'%(L, radius, sent[i]))
             f.close()
     
     return
