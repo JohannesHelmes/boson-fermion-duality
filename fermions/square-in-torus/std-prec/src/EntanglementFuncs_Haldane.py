@@ -12,6 +12,7 @@ Created by Anushya Chandran on 2015-06-30.
 import os
 import numpy as np
 from cmath import phase
+from scipy.optimize import root
 
 
 def one_chern_evec(Hamargs, kx, ky, chkspec= False):
@@ -184,6 +185,16 @@ def twosquares(rad, distance, Lx, Ly):
     
 def phi(kx, ky):
     return phase(complex(np.sin(kx), np.sin(ky) ) )
+
+def vec_func1(k, mn, Lx, Ly):
+    kx, ky = k
+    m, n = mn
+
+    cond_x = kx * (Lx + 1) - m * np.pi - phi(ky, kx)
+    cond_y = ky * (Ly + 1) - n * np.pi - phi(kx, ky)
+
+    return (cond_x, cond_y)
+
 def generate_klists(bc, Lx, Ly):
     """
     generates all k values depending on the boundary conditions (pbc, apbc, obc)
@@ -192,21 +203,43 @@ def generate_klists(bc, Lx, Ly):
     if bc=='pbc':
         kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
         kxlist = 2*np.pi/Lx*np.arange(Lx)
+        kxgrid, kygrid = np.meshgrid(kxlist, kylist)
+        for n in xrange(Ly):
+            for m in xrange(Lx):
+                kxgrid[m,n] = kxlist[m]
+                kygrid[m,n] = kylist[n]
+
     elif bc=='apbc':
         kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
         kxlist = np.pi/Lx*np.arange(1,2*Lx+1,2)
+        kxgrid, kygrid = np.meshgrid(kxlist, kylist)
     elif bc=='obc':
-        print "Work in progress"
+        tol=1e-12
+        kxlist=[]
+        kylist=[]
+        kxgrid = np.zeros((Lx,Ly))
+        kygrid = np.zeros((Lx,Ly))
+        for n in xrange(1,Ly+1):
+            for m in xrange(1,Lx+1):
+                Kx, Ky = root(vec_func1,(np.pi/2, np.pi/2), args=([m,n], Lx, Ly) ).x
+                kxgrid[m-1,n-1] = Kx
+                kygrid[m-1,n-1] = Ky
+
     else:
         raise Exception("The flag bc should be 'pbc' or 'apbc'")
 
-    return kxlist, kylist
+    return kxgrid, kygrid
     
 def cmatfull_analytic(M, bc, Lx, Ly):
     
-    kxlist, kylist = generate_klists(bc, Lx, Ly)
+    if bc=='pbc':
+        kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
+        kxlist = 2*np.pi/Lx*np.arange(Lx)
+    elif bc=='apbc':
+        kylist = np.pi/Ly*np.arange(1,2*Ly+1,2)
+        kxlist = np.pi/Lx*np.arange(1,2*Lx+1,2)
         
-    (kygrid, kxgrid) = meshgrid( kylist, kxlist )   
+    kxgrid, kygrid = np.meshgrid(kxlist, kylist)
     
     dx = sin(kxgrid)
     dy = sin(kygrid)
@@ -258,9 +291,9 @@ def cmatfull(M, bc, Lx, Ly):
     Returns the full correlation matrix"""
     
     
-    kxlist, kylist = generate_klists(bc, Lx, Ly)
+    kxgrid, kygrid = generate_klists(bc, Lx, Ly)
     
-    evecs = np.array([[one_chern_evec([M], kx, ky)[1] for ky in kylist] for kx in kxlist])
+    evecs = np.array([[one_chern_evec([M], kx, ky)[1] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
 
     cdagc = np.fft.ifft2(evecs[:,:,0] * np.conj(evecs[:,:,0]))
     ddagd = np.fft.ifft2(evecs[:,:,1] * np.conj(evecs[:,:,1]))
