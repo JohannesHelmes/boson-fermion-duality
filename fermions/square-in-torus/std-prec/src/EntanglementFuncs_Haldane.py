@@ -294,6 +294,9 @@ def cmatfull(M, bc, Lx, Ly):
     kxgrid, kygrid = generate_klists(bc, Lx, Ly)
     
     evecs = np.array([[one_chern_evec([M], kx, ky)[1] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
+    en = np.array([[one_chern_evec([M], kx, ky)[0] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
+
+    print en
 
     cdagc = np.fft.ifft2(evecs[:,:,0] * np.conj(evecs[:,:,0]))
     ddagd = np.fft.ifft2(evecs[:,:,1] * np.conj(evecs[:,:,1]))

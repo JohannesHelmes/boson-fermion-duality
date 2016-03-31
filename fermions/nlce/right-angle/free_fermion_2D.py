@@ -15,7 +15,7 @@ def getEntropy((Lx,Ly),alpha,regA,Hamiltonian):
 
     Eval,Evec = np.linalg.eigh(Hamiltonian) 
     U=np.matrix(Evec)
-    #print Eval
+    print Eval
 
     '''
     GSOccup=np.kron(([1,0],[0,0]),np.eye(Lx*Ly))

@@ -54,6 +54,6 @@ def getHamiltonian(Lx,Ly,bc='pbc',massterm=1.0): #accepts also 'obc'
 
 #print makeRegionA_ss(L,L)
 
-for L in range(2,25,2):
+for L in range(10,11,2):
     print L, free_fermion_2D.getEntropy((L,L),[1.0],makeRegionA_ss(L,L),getHamiltonian(L,L,BoundCond,1.0))[0]
 
