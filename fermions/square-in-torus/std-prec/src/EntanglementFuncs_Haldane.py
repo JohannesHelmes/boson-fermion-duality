@@ -101,7 +101,7 @@ def square(center_coord, rad, Lx, Ly):
 
 def triangle(center_coord, rad, Lx, Ly):
     """
-    creates a triangle with one 90 degree and to 45 degree corners. The 90 corner is upper left.
+    creates a triangle with one 90 degree and two 45 degree corners. The 90 corner is upper left.
     The center_coord is in the middle of the hypothenuse
     center_coord: tuple with (row, col) index of the center of the square
     rad: Length of the side of the square
@@ -123,6 +123,31 @@ def triangle(center_coord, rad, Lx, Ly):
     centerx = int(Lx/2.)
     centery = int(Ly/2.)
         
+    tmpmask = np.roll(mask, int(np.floor(center_coord[1])) - centery, axis=1)
+    return np.roll(tmpmask, int(np.floor(center_coord[0])) - centerx, axis=0)
+
+def parallelo45(center_coord, rad, Lx, Ly):
+    """
+    creates a parallelogram with two 135 degree and two 45 degree corners. 
+    The center_coord is in the middle of the parallelogram
+    rad: Length of the side along the lattice, the pixelated sides are longer
+    Lx: total number of rows
+    Ly: total number of columns
+    
+    Returns a Lx X Ly array with 1s where the triangle is.
+    """
+    
+    edgex = int(Lx/2.) - int(rad/2)
+    edgey = int(Ly/2.) - int(rad)
+    
+    mask = np.zeros((Lx,Ly), dtype='bool')
+
+    for i,ey in enumerate(range(edgey,edgey+int(rad))):
+        mask[edgex+i,ey:ey + int(rad)] = True
+    
+    centerx = int(Lx/2.)
+    centery = int(Ly/2.)
+
     tmpmask = np.roll(mask, int(np.floor(center_coord[1])) - centery, axis=1)
     return np.roll(tmpmask, int(np.floor(center_coord[0])) - centerx, axis=0)
 
@@ -195,6 +220,25 @@ def vec_func1(k, mn, Lx, Ly):
 
     return (cond_x, cond_y)
 
+def vec_func2(k, mn, Lx, Ly):
+    kx, ky = k
+    m, n = mn
+
+    cond_x = 2* kx * (Lx + 1) - m * 2* np.pi -np.pi + 2* phi(ky, kx)
+    cond_y = 2* ky * (Ly + 1) - n * 2* np.pi + 2* phi(kx, ky)
+    #cond_y = ky * (Ly + 1) - n * 2* np.pi -  np.pi + phi(ky, kx)
+
+    return (cond_x, cond_y)
+
+def vec_func_in1D(k, mn, Lx, Ly):
+    kx, ky = k
+    m, n = mn
+
+    cond_x = 2* kx * (Lx + 1) - m * 2* np.pi -np.pi + 2* phi(ky, kx)
+    cond_y = ky 
+
+    return (cond_x, cond_y)
+
 def generate_klists(bc, Lx, Ly):
     """
     generates all k values depending on the boundary conditions (pbc, apbc, obc)
@@ -221,9 +265,34 @@ def generate_klists(bc, Lx, Ly):
         kygrid = np.zeros((Lx,Ly))
         for n in xrange(1,Ly+1):
             for m in xrange(1,Lx+1):
-                Kx, Ky = root(vec_func1,(np.pi/2, np.pi/2), args=([m,n], Lx, Ly) ).x
+                #Kx, Ky = root(vec_func1,(np.pi/2, np.pi/2), args=([m,n], Lx, Ly) ).x
+                Kx, Ky = root(vec_func2,(np.pi/2, np.pi/2), args=([m,n], Lx, Ly) ).x
                 kxgrid[m-1,n-1] = Kx
                 kygrid[m-1,n-1] = Ky
+
+    else:
+        raise Exception("The flag bc should be 'pbc' or 'apbc'")
+
+    return kxgrid, kygrid
+
+def generate_klists1D(bc, Lx, Ly):
+    """
+    generates all k values depending on the boundary conditions (pbc, apbc, obc)
+    """
+    
+    if bc=='obc':
+        tol=1e-12
+        kxgrid = np.zeros((Lx,1))
+        kygrid = np.zeros((Lx,1))
+        for n in xrange(1,2):
+            for m in xrange(1,Lx+1):
+                Kx, Ky = root(vec_func_in1D,(np.pi/4, 0), args=([m,n], Lx, 1) ).x
+                kxgrid[m-1,n-1] = Kx
+                kygrid[m-1,n-1] = Ky
+    elif bc=='pbc':
+        kxlist = 2*np.pi/Lx*np.arange(Lx)
+        kylist = [0.0]
+        kxgrid, kygrid = np.meshgrid(kxlist, kylist)
 
     else:
         raise Exception("The flag bc should be 'pbc' or 'apbc'")
@@ -261,7 +330,7 @@ def cmatfull_analytic(M, bc, Lx, Ly):
     
     #cdagd = tx + 1j*ty
     #ddagc = tx -1j*ty
-    
+
     return [[cdagc, cdagd], [ddagc, ddagd]]
     
 def ift2_prec(qx):
@@ -295,8 +364,8 @@ def cmatfull(M, bc, Lx, Ly):
     
     evecs = np.array([[one_chern_evec([M], kx, ky)[1] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
     en = np.array([[one_chern_evec([M], kx, ky)[0] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
-
-    print en
+    
+    
 
     cdagc = np.fft.ifft2(evecs[:,:,0] * np.conj(evecs[:,:,0]))
     ddagd = np.fft.ifft2(evecs[:,:,1] * np.conj(evecs[:,:,1]))
@@ -416,7 +485,10 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
         elif shape=='octagon':
             Lmid = int(L/2.)
             maskA = octagon([Lmid+epsx, Lmid+epsy], radius, L, L)
-            
+        elif shape=='parallelo45':
+            Lmid = int(L/2.)
+            maskA = parallelo45([Lmid+epsx, Lmid+epsy], radius, L, L)
+
         
         #Compute the entanglement entropy of the region A
         corrA = cmatA(maskA, Cfull)
@@ -436,6 +508,8 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
             f = open(fname[i], 'a')
             f.write('%f %f %f \n'%(L, radius, sent[i]))
             f.close()
+
+            print sent[i]
     
     return
 

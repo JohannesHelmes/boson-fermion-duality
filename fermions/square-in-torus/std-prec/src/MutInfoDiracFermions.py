@@ -24,7 +24,7 @@ def main():
     
     parser.add_argument('--epsx','-x', type=float, help='x coordinate of the center of the circle minus system size/2', default=0.3)
     parser.add_argument('--epsy','-y', type=float, help='y coordinate of the center of the circle minus system size/2', default=0.3)
-    parser.add_argument('--shape','-s', choices=['circle','square'], help='Shape of the region', default='square')
+    parser.add_argument('--shape','-s', choices=['circle','square','triangle','parallelo45'], help='Shape of the region', default='square')
 
     parser.add_argument('--mode', choices=['ratio','singlesite'], help='Mode of bipartition', default='ratio')
     
@@ -45,12 +45,13 @@ def main():
     epsy = args.epsy
     shape = args.shape
     
+    
     if args.mode=='ratio':
         rmin = args.radius[0]
         rmax = args.radius[1]
         rstep = args.radius[2]
-        L_all = np.array(rad_all*args.Lmult, dtype=int)
         rad_all = np.arange(rmin,rmax,rstep)
+        L_all = np.array(rad_all*args.Lmult, dtype=int)
     elif args.mode=='singlesite':
         lmin = args.L[0]
         lmax = args.L[1]
@@ -72,7 +73,7 @@ def main():
     fnames=[]
     for alpha in alphas:
         if args.mode=='ratio':
-            fname = 'EE_'+shape+'_M%1.2f_Lmult%1.2f_alpha%1.3f_'%(M, Lmult, alpha)+bc+'.txt'
+            fname = 'EE_'+shape+'_M%1.2f_Lmult%1.2f_alpha%1.3f_'%(M, args.Lmult, alpha)+bc+'.txt'
         elif args.mode=='singlesite':
             fname = 'EE_'+shape+'_M%1.2f_singlesite_alpha%1.3f_'%(M, alpha)+bc+'.txt'
 

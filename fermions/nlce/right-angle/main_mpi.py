@@ -47,9 +47,9 @@ def readArray(line):
   return line[start+1:end] 
 ####### end readArray(line) function #######
 
-def readWeights(alpha, massterm, max_order):
+def readWeights(alpha, massterm, max_order, bc='obc'):
   w={}
-  filename = "weights_mass" + decimalStr(massterm) + ".txt"
+  filename = "data/weights_mass_"+bc + decimalStr(massterm) + ".txt"
   if os.path.isfile(filename):
     fin = open(filename,'r')
     line = fin.readline()
@@ -101,7 +101,7 @@ def readWeights(alpha, massterm, max_order):
 ####### end readWeights(alpha, massterm) #######
 
 
-def generateHamiltonian(Lx,Ly,massterm):
+def generateHamiltonian(Lx,Ly,massterm,bc='obc'):
 
     Ns = Lx * Ly
     L  = (Lx,Ly)
@@ -112,14 +112,20 @@ def generateHamiltonian(Lx,Ly,massterm):
 
     diag=np.kron(np.eye(Ns),local_diag)
 
-    diag_x=np.diag([1.]*(Lx-1),1)
-    hopping_x=np.kron(diag_x,hopping_x_p)
-    offdiag_x=np.kron(np.eye(Ly),hopping_x)
+    if bc=='pbc':
+        diag_x=np.roll(np.eye(Lx),1,axis=1)
+        hopping_x=np.kron(diag_x,hopping_x_p)
+        offdiag_x=np.kron(np.eye(Ly),hopping_x)
+    
+        offdiag_y=np.kron(np.roll(np.eye(Ns),Lx,axis=1),hopping_y_p)
+    elif bc=='obc':
+        diag_x=np.diag([1.]*(Lx-1),1)
+        hopping_x=np.kron(diag_x,hopping_x_p)
+        offdiag_x=np.kron(np.eye(Ly),hopping_x)
 
-    offdiag_y=np.kron(np.diag([1.]*(Ns-Lx),Lx),hopping_y_p)
+        offdiag_y=np.kron(np.diag([1.]*(Ns-Lx),Lx),hopping_y_p)
 
     upper_tri=diag+offdiag_x+offdiag_y
-
     Ham=upper_tri+upper_tri.getH()
 
     return Ham
@@ -128,27 +134,29 @@ def generateHamiltonian(Lx,Ly,massterm):
 # User settings
 
 order_min = 2
-order_max = 24
+order_max = 16
 order = clust_order.Max()
 massterm = 1.0
+bc='obc'
+
 #############################
 
 
 clusters = []
 #alpha= (1./np.linspace(2.1,4,20)).tolist() + np.linspace(0.5,4.0,36).tolist()
-alpha= (1./np.linspace(1.0,4,31)).tolist() 
+alpha= (np.linspace(1.0,4.0,4)).tolist() 
 #alpha=np.array( np.linspace(0.4,10,49).tolist() + [20,50,100,200,500,1000] )
 
 if rank==0:
     t1 = time.clock()
     total = np.zeros(len(alpha))
-    w,weights = readWeights(alpha,massterm,order_max) #try to read in weights (if there are any stored)
+    w,weights = readWeights(alpha,massterm,order_max,bc) #try to read in weights (if there are any stored)
     print "\nInitial weights:"
     print [key for key in w]
     #print w
 
     #Save the weights to file:
-    filename = "weights_mass" + decimalStr(massterm) + ".txt"
+    filename = "data/weights_mass_"+ bc + decimalStr(massterm) + ".txt"
     fout_w = open(filename, 'w')
     #Write the alpha array:
     fout_w.write("alpha = [ ")
@@ -158,7 +166,7 @@ if rank==0:
 
     fout_res=[0 for i in alpha]
     for i,n in enumerate(alpha):
-      filename = "results_mass" + decimalStr(massterm) + "_alpha" + decimalStr(n) + ".txt"
+      filename = "data/results_mass_"+ bc + decimalStr(massterm) + "_alpha" + decimalStr(n) + ".txt"
       fout_res[i] = open(filename, 'w')
 else:
     weights=np.zeros((order_max+1,order_max+1,len(alpha)))
@@ -176,7 +184,7 @@ for equalsum in range(2*order_min,MaxSUM+1):
 
         if weights[Lx,Ly].all()==0:
             
-            Hamiltonian=generateHamiltonian(Lx,Ly,massterm)
+            Hamiltonian=generateHamiltonian(Lx,Ly,massterm,bc)
             w_clust_name = clust_name(Lx,Ly)
 
             if rank==0:
