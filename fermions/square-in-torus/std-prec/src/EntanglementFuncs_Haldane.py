@@ -187,6 +187,35 @@ def octagon(center_coord, rad, Lx, Ly):
     return np.roll(tmpmask, int(np.floor(center_coord[0])) - centerx, axis=0)
 
 
+def band_tanm2(center_coord, rad, Lx, Ly):
+    """
+    creates a band with 4 angles of tan theta = -2. 
+    rad: 1/2 width of the band
+    Lx: total number of rows
+    Ly: total number of columns
+    
+    Returns a Lx X Ly array with 1s where the triangle is.
+    """
+    
+    edgex = int(Lx/2.) - int(rad/2)
+    edgey = (rad)
+    
+    mask = np.zeros((Lx,Ly), dtype='bool')
+    mask[:,:2*rad] = True
+
+    for i in range(0,int(rad),2):
+        mask[edgex-i/2-Lx/4:edgex+rad+i/2-Lx/4,edgey+i] = False
+        mask[edgex-i/2-Lx/4:edgex+rad+i/2-Lx/4,edgey+i+1] = False
+
+        mask[edgex-i/2+Lx/4:edgex+rad+i/2+Lx/4,edgey-i-1] = False
+        mask[edgex-i/2+Lx/4:edgex+rad+i/2+Lx/4,edgey-i-2] = False
+    
+    centerx = int(Lx/2.)
+    centery = int(Ly/2.)
+
+    tmpmask = np.roll(mask, int(np.floor(center_coord[1])) - centery, axis=1)
+    return np.roll(tmpmask, int(np.floor(center_coord[0])) - centerx, axis=0)
+
 def twosquares(rad, distance, Lx, Ly):
     """rad: length of each square
     distance: distance between the two squares measured from their centers
@@ -488,6 +517,11 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
         elif shape=='parallelo45':
             Lmid = int(L/2.)
             maskA = parallelo45([Lmid+epsx, Lmid+epsy], radius, L, L)
+        elif shape=='band_tanm2':
+            Lmid = int(L/2.)
+            maskA = band_tanm2([Lmid+epsx, Lmid+epsy], radius, L, L)
+
+        #print maskA.astype(int)
 
         
         #Compute the entanglement entropy of the region A
@@ -509,7 +543,7 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
             f.write('%f %f %f \n'%(L, radius, sent[i]))
             f.close()
 
-            print sent[i]
+            #print sent[i]
     
     return
 

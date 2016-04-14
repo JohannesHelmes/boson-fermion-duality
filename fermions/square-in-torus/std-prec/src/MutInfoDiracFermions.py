@@ -24,7 +24,7 @@ def main():
     
     parser.add_argument('--epsx','-x', type=float, help='x coordinate of the center of the circle minus system size/2', default=0.3)
     parser.add_argument('--epsy','-y', type=float, help='y coordinate of the center of the circle minus system size/2', default=0.3)
-    parser.add_argument('--shape','-s', choices=['circle','square','triangle','parallelo45'], help='Shape of the region', default='square')
+    parser.add_argument('--shape','-s', choices=['circle','square','triangle','parallelo45','band_tanm2'], help='Shape of the region', default='square')
 
     parser.add_argument('--mode', choices=['ratio','singlesite'], help='Mode of bipartition', default='ratio')
     
@@ -62,7 +62,7 @@ def main():
 
     alphas=(1./np.linspace(1.1,5.0,40)).tolist()+np.linspace(1.0,5.0,41).tolist()
     alphas=[1.0,2.0,3.0,4.0]
-    alphas=[1.0]
+    #alphas=[1.0]
 
     # Directory for data
     pathn = args.outDir
