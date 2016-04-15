@@ -24,7 +24,7 @@ def main():
     
     parser.add_argument('--epsx','-x', type=float, help='x coordinate of the center of the circle minus system size/2', default=0.3)
     parser.add_argument('--epsy','-y', type=float, help='y coordinate of the center of the circle minus system size/2', default=0.3)
-    parser.add_argument('--shape','-s', choices=['circle','square','triangle','parallelo45','band_tanm2'], help='Shape of the region', default='square')
+    parser.add_argument('--shape','-s', choices=['circle','square','triangle','octagon','parallelo45','band_tanm2'], help='Shape of the region', default='square')
 
     parser.add_argument('--mode', choices=['ratio','singlesite'], help='Mode of bipartition', default='ratio')
     

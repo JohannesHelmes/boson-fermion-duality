@@ -34,7 +34,7 @@ def one_chern_evec(Hamargs, kx, ky, chkspec= False):
   """
   M = Hamargs[0]
   d = np.array([np.sin(kx) , np.sin(ky), 2 + M - np.cos(kx) - np.cos(ky)])
-  
+
   sigx = np.array([ [0,1], [1,0] ])
   sigy = np.array([ [0, -1j], [ 1j,0] ], dtype = 'complex')
   sigz = np.array([ [1, 0], [0, -1]])
@@ -42,6 +42,8 @@ def one_chern_evec(Hamargs, kx, ky, chkspec= False):
   darr = d[0]*sigx + d[1]*sigy + d[2]*sigz
 
   (en, evecs) = np.linalg.eigh(darr)
+
+  #print darr[0,1]
 
   
   if chkspec:
@@ -392,7 +394,9 @@ def cmatfull(M, bc, Lx, Ly):
     kxgrid, kygrid = generate_klists(bc, Lx, Ly)
     
     evecs = np.array([[one_chern_evec([M], kx, ky)[1] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
-    en = np.array([[one_chern_evec([M], kx, ky)[0] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
+    #en = np.array([[one_chern_evec([M], kx, ky)[0] for (kx, ky) in zip(rowx, rowy)] for (rowx, rowy) in zip(kxgrid[:],kygrid[:])])
+    #print evecs[0,0,1]
+
     
     
 
@@ -401,6 +405,7 @@ def cmatfull(M, bc, Lx, Ly):
     
     ddagc = np.fft.ifft2(evecs[:,:,0] * np.conj(evecs[:,:,1]))
     cdagd = np.fft.ifft2(evecs[:,:,1] * np.conj(evecs[:,:,0]))
+    #print ddagd[0,1]
 
     return [[cdagc, cdagd], [ddagc, ddagd]]
 
@@ -413,13 +418,14 @@ def cmatA(maskA, corrfull):
     
     (Lx, Ly) = maskA.shape
     (Arow, Acol) = np.nonzero(maskA)
-    
+
     N = Arow.size
     
     CmatA = np.zeros((2*N, 2*N), dtype='complex')
     
     Cmatfull = corrfull
     
+    # Exploiting translational invariance
     CmatA[0:N, 0:N] = np.array([[Cmatfull[0][0][ np.mod(Arow[i]-Arow[j], Lx), np.mod(Acol[i]-Acol[j], Ly)] for j in range(N)] for i in range(N)])
     CmatA[0:N, N:] = np.array([[Cmatfull[0][1][ np.mod(Arow[i]-Arow[j], Lx), np.mod(Acol[i]-Acol[j], Ly)] for j in range(N)] for i in range(N)])
     CmatA[N:, 0:N] = np.array([[Cmatfull[1][0][ np.mod(Arow[i]-Arow[j], Lx), np.mod(Acol[i]-Acol[j], Ly)] for j in range(N)] for i in range(N)])
@@ -544,6 +550,7 @@ def ee_diffradii(shape, M, bc, epsx, epsy, L_all, rad_all, alphas, fname):
             f.close()
 
             #print sent[i]
+        print radius
     
     return
 
