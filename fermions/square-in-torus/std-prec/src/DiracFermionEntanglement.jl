@@ -38,6 +38,78 @@ function band_tanm2(L, a::Int)
     mask
 end
 
+### generate the geometry for a band winding around the torus with 8 corners with tan theta = -1, a is the width of the band
+function band_tanm1(L, a::Int)
+    mask = zeros(Bool, (L,L))
+
+    mask[:,1:a] = true
+    m_x, m_y = Int(round(L/4 - a/2 + 1)), Int(round(a/2 + 1)) # lower left corner of the triangle
+
+    for i::Int in 0:round(a/2)-1
+        mask[m_x-i:m_x+a+i-1,m_y+i] = false
+    end
+
+    m_x, m_y = Int(round(3*L/4 - a/2 + 1)), Int(round(a/2)) # lower left corner of the triangle
+    for i::Int in 0:round(a/2)-1
+        mask[m_x-i:m_x+a+i-1,m_y-i] = false
+    end
+    mask
+end
+
+### generate the geometry for a band winding around the torus with 8 corners with tan theta = -1/2, a is the width of the band
+function band_tanmh(L, a::Int)
+    mask = zeros(Bool, (L,L))
+
+    mask[:,1:a] = true
+    m_x, m_y = Int(round(L/4 - a/2 + 1)), Int(round(a/2 + 1)) # lower left corner of the triangle
+
+    for i::Int in 0:round(a/2)-1
+        mask[m_x-2*i:m_x+a+2*i-1,m_y+i] = false
+    end
+
+    m_x, m_y = Int(round(3*L/4 - a/2 + 1)), Int(round(a/2)) # lower left corner of the triangle
+    for i::Int in 0:round(a/2)-1
+        mask[m_x-2*i:m_x+a+2*i-1,m_y-i] = false
+    end
+    mask
+end
+
+### generate the geometry for a parallelogram to obtain the 3pi/4 angle by subtraction of the pi/4 angle, a is the length of the non pixel side
+function parallelo45(L, a::Int)
+    mask = zeros(Bool, (L,L))
+
+    llc_x, llc_y = Int(round(L/2 - a/2 + 1)), Int(round(L/2 - a)) # lower left corner of the triangle
+    for (n,i) in enumerate(collect(llc_x:llc_x + a -1))
+        mask[i, llc_y+n:llc_y+n+a-1] = true
+    end
+    mask
+end
+
+### generate the geometry for a parallelogram to obtain the tan theta = 1/2 angle by subtraction of the -1/2 angle, 
+### a is the length of the non pixel side
+function parallelotanh(L, a::Int)
+    mask = zeros(Bool, (L,L))
+
+    llc_x, llc_y = Int(round(L/2 - a/2 + 1)), Int(round(L/2 - 2*a)) # lower left corner of the triangle
+    for (n,i) in enumerate(collect(llc_x:llc_x + a -1))
+        mask[i, llc_y+2*n-1:llc_y+2*n-1+a-1] = true
+    end
+    mask
+end
+
+### generate the geometry for a parallelogram to obtain the tan theta = 2 angle by subtraction of the -2 angle, 
+### a is the length of the non pixel side
+function parallelotan2(L, a::Int)
+    mask = zeros(Bool, (L,L))
+
+    llc_x, llc_y = Int(round(L/2 - a + 1)), Int(round(L/2 - a)) # lower left corner of the triangle
+    for (n,i) in enumerate(collect(llc_x:2:llc_x + 2*a -1))
+        mask[i, llc_y+n:llc_y+n+a-1] = true
+        mask[i+1, llc_y+n:llc_y+n+a-1] = true
+    end
+    mask
+end
+
 # Periodic boundary conditions in x direction, anti-periodic in y
 function generate_ks(L)
     kx= 2*pi/L*collect(0:L-1)
@@ -112,7 +184,7 @@ function CmatA(L::Int, maskA::Array{Bool,2})
 end
 
 function Entanglement(alphas::Array{Int64}, L::Int, regionA::Array{Bool,2})
-    corrA = CmatA(L, regionA)
+    corrA::Hermitian = Hermitian( CmatA(L, regionA) )
     #println(ishermitian(corrA))
 
     pA = abs(real(eigvals!(corrA)))
@@ -129,15 +201,20 @@ function Entanglement(alphas::Array{Int64}, L::Int, regionA::Array{Bool,2})
 end
 
 
-mult = 8
-L=2:2:32
+mult = 4
+L=74:2:80
 
 alphas = [1, 2, 3, 4]
 
 for l in L
     #regionA = triangle(l*mult, l)
     #regionA = square(l*mult, l)
-    regionA = band_tanm2(l*mult, l)
+    #regionA = parallelo45(l*mult, l)
+    #regionA = parallelotanh(l*mult, l)
+    #regionA = parallelotan2(l*mult, l)
+    #regionA = band_tanm2(l*mult, l)
+    regionA = band_tanm1(l*mult, l)
+    #regionA = band_tanmh(l*mult, l)
     #println( regionA)
     entropies = Entanglement(alphas, l*mult, regionA)
     println(l," ",entropies[1]," ",entropies[2]," ",entropies[3]," ",entropies[4]," ")
